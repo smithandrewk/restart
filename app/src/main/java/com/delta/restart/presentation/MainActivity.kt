@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.delta.util.FileHandler
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -81,7 +80,6 @@ class MainActivity : ComponentActivity() {
         Log.d("0000","onPause")
     }
 }
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class SensorService: Service() {
     private lateinit var wakeLock: PowerManager.WakeLock
     private lateinit var mSensorHandler: SensorHandler
@@ -89,6 +87,7 @@ class SensorService: Service() {
     private lateinit var mBatteryHandler: BatteryHandler
     private val mMainViewModel = MainViewModel()
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
         super.onCreate()
@@ -98,8 +97,9 @@ class SensorService: Service() {
         wakeLock.acquire()
         mFileHandler = FileHandler(filesDir)
         mSensorHandler = SensorHandler(mFileHandler,getSystemService(SENSOR_SERVICE) as SensorManager)
-        mBatteryHandler = BatteryHandler(::registerReceiver,::unregisterReceiver, mFileHandler, mMainViewModel::updateBatteryLevel)
-
+        if (Build.VERSION.SDK_INT > 28) {
+            mBatteryHandler = BatteryHandler(::registerReceiver,::unregisterReceiver, mFileHandler, mMainViewModel::updateBatteryLevel)
+        }
         startForegroundService()
     }
 
@@ -121,6 +121,7 @@ class SensorService: Service() {
         startForeground(1, notification)
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onDestroy() {
         super.onDestroy()
         Log.d("0000","onDestroyService")
@@ -129,7 +130,9 @@ class SensorService: Service() {
         }
         mSensorHandler.unregisterAll()
         mFileHandler.closeFiles()
-        mBatteryHandler.unregister()
+        if (Build.VERSION.SDK_INT > 28) {
+            mBatteryHandler.unregister()
+        }
     }
     override fun onBind(p0: Intent?): IBinder? {
         return null
