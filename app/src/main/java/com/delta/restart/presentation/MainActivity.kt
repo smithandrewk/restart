@@ -26,11 +26,15 @@ import com.delta.restart.presentation.theme.RestartTheme
 import android.hardware.SensorManager
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.ViewModel
 import com.example.delta.util.FileHandler
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -142,10 +146,26 @@ class SensorService: Service() {
 @Composable
 fun WearApp() {
     RestartTheme {
+        val scope = rememberCoroutineScope()
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.background),
+                .background(MaterialTheme.colors.background)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = {
+                            val startTime = System.currentTimeMillis()
+                            tryAwaitRelease()
+                            val endTime = System.currentTimeMillis()
+                            Log.d("0000","${endTime - startTime}")
+                            if (endTime - startTime >= 5000) { // 5 seconds
+                                scope.launch {
+                                    Log.d("0000","pressed")
+                                }
+                            }
+                        }
+                    )
+                },
             contentAlignment = Alignment.Center
         ) {
             TimeText()
