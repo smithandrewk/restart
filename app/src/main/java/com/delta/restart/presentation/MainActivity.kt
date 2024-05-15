@@ -23,7 +23,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.TimeText
 import com.delta.restart.R
-import com.delta.restart.presentation.theme.RestartTheme
 import android.hardware.SensorManager
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -36,7 +35,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.example.delta.util.FileHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileOutputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
@@ -82,9 +83,15 @@ class MainActivity : ComponentActivity() {
 
         val tarGzFilePaths = mutableListOf<String>()
 
-        subdirectories.forEach { subdirectory ->
+        for (subdirectory in subdirectories) {
+            val tarGzFile = File(subdirectory.parent, "${subdirectory.name}.tar.gz")
+            if (tarGzFile.exists()) {
+                // If the tar.gz file already exists, skip creating it
+                Log.d("0000","Existing tar.gz file at: $tarGzFile.absolutePath")
+                tarGzFilePaths.add(tarGzFile.absolutePath)
+                continue
+            }
             try {
-                val tarGzFile = File(subdirectory.parent, "${subdirectory.name}.tar.gz")
                 FileOutputStream(tarGzFile).use { fos ->
                     GzipCompressorOutputStream(fos).use { gcos ->
                         TarArchiveOutputStream(gcos).use { taos ->
@@ -93,6 +100,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+                Log.d("0000","Created tar.gz file at: $tarGzFile.absolutePath")
                 tarGzFilePaths.add(tarGzFile.absolutePath)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -214,36 +222,46 @@ class SensorService: Service() {
 
 }
 @Composable
-fun WearApp(listDirectories: () -> Unit, zip: (Context) -> Unit,startService: () -> Unit,stopService: () -> Unit,) {
-    RestartTheme {
-        val context = LocalContext.current
-        val scope = rememberCoroutineScope()
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = {
-                            val startTime = System.currentTimeMillis()
-                            tryAwaitRelease()
-                            val endTime = System.currentTimeMillis()
-                            Log.d("0000","${endTime - startTime}")
-                            if (endTime - startTime >= 5000) { // 5 seconds
+fun WearApp(listDirectories: () -> Unit, tarGzDirectories: (Context) -> List<String>, startService: () -> Unit,stopService: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        val startTime = System.currentTimeMillis()
+                        tryAwaitRelease()
+                        val endTime = System.currentTimeMillis()
+                        Log.d("0000", "${endTime - startTime}")
+                        if (endTime - startTime >= 500) { // 5 seconds
+                            scope.launch {
+                                Log.d("0000", "pressed")
                                 scope.launch {
-                                    Log.d("0000","pressed")
+                                    // Stop the service
                                     stopService()
-                                    listDirectories()
-                                    zip(context)
+
+                                    // Wait for the service to stop if necessary
+                                    delay(1000)  // Adjust the delay if needed to ensure the service stops
+
+                                    val tarGzFilePaths = tarGzDirectories(context)
+
+                                    delay(1000)  // Adjust the delay if needed to ensure the service stops
+
+                                    // Start service again
+                                    startService()
+                                    // TODO: potentially destroy activity as well and say thank you in a toast
                                 }
                             }
                         }
-                    )
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            TimeText()
-        }
+                    }
+                )
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        TimeText()
     }
 }
 
