@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
@@ -32,9 +33,18 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.example.delta.util.FileHandler
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
+import java.io.BufferedInputStream
+import java.io.FileInputStream
+import java.io.IOException
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,12 +56,72 @@ class MainActivity : ComponentActivity() {
         setTheme(android.R.style.Theme_DeviceDefault)
 
         setContent {
-            WearApp()
+            WearApp(::listDirectories,::tarGzDirectories,::startService,::stopService)
         }
 
         startService()
     }
+    private fun listDirectories() {
+        val root = File(getExternalFilesDir(null)!!.absolutePath)
+        val files = root.listFiles()
+        files?.filter { it.isDirectory }?.forEach { directory ->
+            println("${directory.name} - Size: ${getDirectorySize(directory)} bytes")
+        }
+    }
+    private fun getDirectorySize(directory: File): Long {
+        var size: Long = 0
+        val files = directory.listFiles()
+        files?.forEach { file ->
+            size += if (file.isDirectory) getDirectorySize(file) else file.length()
+        }
+        return size
+    }
+    private fun tarGzDirectories(context: Context): List<String> {
+        val mainDirectory = context.getExternalFilesDir(null) ?: return emptyList()
+        val subdirectories = mainDirectory.listFiles { file -> file.isDirectory } ?: return emptyList()
 
+        val tarGzFilePaths = mutableListOf<String>()
+
+        subdirectories.forEach { subdirectory ->
+            try {
+                val tarGzFile = File(subdirectory.parent, "${subdirectory.name}.tar.gz")
+                FileOutputStream(tarGzFile).use { fos ->
+                    GzipCompressorOutputStream(fos).use { gcos ->
+                        TarArchiveOutputStream(gcos).use { taos ->
+                            taos.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX)
+                            addFilesToTarGz(taos, subdirectory, "")
+                        }
+                    }
+                }
+                tarGzFilePaths.add(tarGzFile.absolutePath)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        return tarGzFilePaths
+    }
+    @Throws(IOException::class)
+    private fun addFilesToTarGz(tarArchive: TarArchiveOutputStream, file: File, parent: String) {
+        val entryName = if (parent.isEmpty()) file.name else "$parent/${file.name}"
+        val entry = TarArchiveEntry(file, entryName)
+
+        tarArchive.putArchiveEntry(entry)
+
+        if (file.isFile) {
+            FileInputStream(file).use { fis ->
+                BufferedInputStream(fis).use { bis ->
+                    bis.copyTo(tarArchive, 8192)
+                }
+            }
+            tarArchive.closeArchiveEntry()
+        } else if (file.isDirectory) {
+            tarArchive.closeArchiveEntry()
+            file.listFiles()?.forEach { child ->
+                addFilesToTarGz(tarArchive, child, entryName)
+            }
+        }
+    }
     private fun startService() {
         val serviceIntent = Intent(this, SensorService::class.java)
         startService(serviceIntent)
@@ -99,7 +169,7 @@ class SensorService: Service() {
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SensorService::WakeLock");
         wakeLock.acquire()
-        mFileHandler = FileHandler(filesDir)
+        mFileHandler = FileHandler(getExternalFilesDir(null)!!)
         mSensorHandler = SensorHandler(mFileHandler,getSystemService(SENSOR_SERVICE) as SensorManager)
         if (Build.VERSION.SDK_INT > 28) {
             mBatteryHandler = BatteryHandler(::registerReceiver,::unregisterReceiver, mFileHandler, mMainViewModel::updateBatteryLevel)
@@ -144,8 +214,9 @@ class SensorService: Service() {
 
 }
 @Composable
-fun WearApp() {
+fun WearApp(listDirectories: () -> Unit, zip: (Context) -> Unit,startService: () -> Unit,stopService: () -> Unit,) {
     RestartTheme {
+        val context = LocalContext.current
         val scope = rememberCoroutineScope()
         Box(
             modifier = Modifier
@@ -161,6 +232,9 @@ fun WearApp() {
                             if (endTime - startTime >= 5000) { // 5 seconds
                                 scope.launch {
                                     Log.d("0000","pressed")
+                                    stopService()
+                                    listDirectories()
+                                    zip(context)
                                 }
                             }
                         }
@@ -178,4 +252,5 @@ class MainViewModel(): ViewModel() {
     fun updateBatteryLevel(newLevel: Float) {
         currentBatteryLevel = newLevel
     }
+
 }
