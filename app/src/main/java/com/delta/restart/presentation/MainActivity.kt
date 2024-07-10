@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
@@ -48,7 +49,7 @@ import java.io.File
 import java.text.DecimalFormat
 
 class MainActivity : ComponentActivity() {
-    private var lastDirectorySize = mutableStateOf<Float?>(null)
+    private var lastDirectorySize = mutableStateOf<Float?>(0f)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -158,7 +159,7 @@ class SensorService: Service() {
 }
 @Composable
 fun WearApp(lastDirectorySize: Float?) {
-    val df = DecimalFormat("#.###")
+    val df = DecimalFormat("#.######")
     val formattedSize = lastDirectorySize?.let { df.format(it) }
     RestartTheme {
         Scaffold(
@@ -197,10 +198,16 @@ fun WearApp(lastDirectorySize: Float?) {
 fun getLastDirectorySize(context: Context): Float {
     val filesDir = context.filesDir
     val directories = filesDir.listFiles { file -> file.isDirectory }?.toList() ?: emptyList()
-    val lastDirectory = directories.lastOrNull()
+
+    // Sort directories by name
+    val sortedDirectories = directories.sortedBy { it.name }
+
+    val lastDirectory = sortedDirectories.lastOrNull()
     val sizeInBytes = lastDirectory?.let { getDirectorySize(it) } ?: 0L
+    Log.d("0000","$sizeInBytes")
     return sizeInBytes / (1024f * 1024f) * 0.02f// Convert bytes to megabytes
 }
+
 fun getDirectorySize(directory: File): Long {
     var size = 0L
     directory.listFiles()?.forEach { file ->
