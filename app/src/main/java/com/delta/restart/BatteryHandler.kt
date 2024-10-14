@@ -1,4 +1,4 @@
-package com.delta.restart.presentation
+package com.delta.restart
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -7,7 +7,6 @@ import android.os.BatteryManager
 import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
-import com.example.delta.util.FileHandler
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class BatteryHandler (registerReceiver: (receiver: BroadcastReceiver, filter: IntentFilter, flags: Int) -> Unit, unregisterReceiver: (br: BroadcastReceiver) -> Unit, fileHandler: FileHandler, updateBatteryLevel: (newLevel: Float) -> Unit){

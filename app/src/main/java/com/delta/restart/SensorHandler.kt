@@ -1,8 +1,7 @@
-package com.delta.restart.presentation
+package com.delta.restart
 
 import android.hardware.Sensor
 import android.hardware.SensorManager
-import com.example.delta.util.FileHandler
 
 class SensorHandler(fileHandler: FileHandler, sensorManager: SensorManager) {
     private var mSensorManager: SensorManager = sensorManager

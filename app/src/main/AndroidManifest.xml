@@ -3,6 +3,9 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH"/>
+    <uses-permission android:name="android.permission.BODY_SENSORS"/>
+
     <uses-feature android:name="android.hardware.type.watch" />
 
     <application
@@ -14,27 +17,16 @@
         <uses-library
             android:name="com.google.android.wearable"
             android:required="true" />
-
-        <!--
-               Set to true if your app is Standalone, that is, it does not require the handheld
-               app to run.
-        -->
         <meta-data
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
 
-        <activity
-            android:name=".presentation.MainActivity"
+        <service
+            android:name=".SensorService"
+            android:enabled="true"
             android:exported="true"
-            android:taskAffinity=""
-            android:theme="@style/MainActivityTheme.Starting">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <service android:name=".presentation.SensorService" android:foregroundServiceType="health"/>
+            android:foregroundServiceType="health"
+            />
     </application>
 
 </manifest>

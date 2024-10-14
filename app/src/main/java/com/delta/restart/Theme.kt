@@ -1,4 +1,4 @@
-package com.delta.restart.presentation.theme
+package com.delta.restart
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material.MaterialTheme
