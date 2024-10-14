@@ -20,6 +20,10 @@ class SensorService: Service() {
     private lateinit var mBatteryHandler: BatteryHandler
     private val mMainViewModel = MainViewModel()
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_STICKY
+    }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
