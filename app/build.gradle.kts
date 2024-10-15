@@ -50,16 +50,32 @@ android {
 
 dependencies {
 
+    // Google Play services wearable
     implementation(libs.play.services.wearable)
+
+    // Compose BOM (Bill of Materials) to manage versions of Compose libraries
     implementation(platform(libs.compose.bom))
-    implementation(libs.ui)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.compose.material)
-    implementation(libs.compose.foundation)
-    implementation(libs.activity.compose)
-    implementation(libs.core.splashscreen)
+
+    // Core Compose libraries
+    implementation(libs.ui)                              // Compose UI
+    implementation(libs.ui.tooling.preview)              // Compose UI Tooling Preview
+    implementation(libs.compose.material)                // Material Design components in Compose
+    implementation(libs.compose.foundation)              // Foundation components for Compose
+
+    // Wear OS-specific Compose libraries
+    implementation(libs.wear.compose.foundation)         // Compose Foundation for Wear OS
+    implementation(libs.wear.compose.material)           // Material Design for Wear OS
+    implementation(libs.wear.compose.navigation)         // Navigation in Wear OS Compose
+
+    // Activity and Splash Screen in Compose
+    implementation(libs.activity.compose)                // Activity support for Compose
+    implementation(libs.core.splashscreen)               // Core Splash Screen support
+
+    // Android Test Dependencies
     androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.tooling)
-    debugImplementation(libs.ui.test.manifest)
+    androidTestImplementation(libs.ui.test.junit4)       // Compose testing dependencies
+
+    // Debug dependencies for Compose
+    debugImplementation(libs.ui.tooling)                 // Tooling support
+    debugImplementation(libs.ui.test.manifest)           // Manifest testing support
 }
