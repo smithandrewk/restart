@@ -1,9 +1,8 @@
-package com.delta.restart.presentation
+package com.delta.restart
 
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
-import com.example.delta.util.FileHandler
 
 class AccelerometerListener (fileHandler: FileHandler): SensorEventListener {
     private val mFileHandler = fileHandler

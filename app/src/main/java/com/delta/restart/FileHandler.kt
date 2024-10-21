@@ -1,4 +1,4 @@
-package com.example.delta.util
+package com.delta.restart
 
 import android.hardware.SensorEvent
 import android.icu.text.SimpleDateFormat
