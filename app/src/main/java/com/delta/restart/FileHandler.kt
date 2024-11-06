@@ -14,8 +14,10 @@ class FileHandler(filesDir: File) {
     )
     private var fLog: FileOutputStream
     private var fAccelerometerData: GZIPOutputStream
+    private var fInference: GZIPOutputStream
     private var fGyroscopeData: GZIPOutputStream
     private val mFilesDir = filesDir
+
     init {
         File(mFilesDir, appStartTimeReadable).mkdir()
         fLog = FileOutputStream(File(filesDir, "$appStartTimeReadable/log.csv"))
@@ -27,6 +29,9 @@ class FileHandler(filesDir: File) {
         fGyroscopeData = GZIPOutputStream(FileOutputStream(File(filesDir, "$appStartTimeReadable/gyroscope.csv.gz")))
         fGyroscopeData.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
         fGyroscopeData.write("timestamp,x,y,z\n".toByteArray())
+        fInference = GZIPOutputStream(FileOutputStream(File(filesDir, "$appStartTimeReadable/inference.csv.gz")))
+        fInference.write("File Start Time: ${Calendar.getInstance().timeInMillis}\n".toByteArray())
+        fInference.write("inference\n".toByteArray())
         try {
             val json = JSONObject()
                 .put("App Start Time Readable", appStartTimeReadable)
@@ -44,9 +49,13 @@ class FileHandler(filesDir: File) {
     fun writeGyroscopeEvent(event: SensorEvent){
         fGyroscopeData.write("${event.timestamp},${event.values[0]},${event.values[1]},${event.values[2]}\n".toByteArray())
     }
+    fun writeInference(inference: String){
+        fGyroscopeData.write("$inference\n".toByteArray())
+    }
     fun closeFiles(){
         fLog.close()
         fAccelerometerData.close()
         fGyroscopeData.close()
+        fInference.close()
     }
 }

@@ -32,7 +32,7 @@ class BatteryHandler (registerReceiver: (receiver: BroadcastReceiver, filter: In
             val level: Int = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             val scale: Int = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
             val batteryLevel = level * 100 / scale.toFloat()
-            mFileHandler.writeToLog("battery: $batteryLevel")
+            mFileHandler.writeToLog("battery,$batteryLevel")
             mUpdateBatteryLevel(batteryLevel)
         }
     }

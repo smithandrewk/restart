@@ -7,10 +7,12 @@ composeMaterial = "1.2.1"
 composeFoundation = "1.2.1"
 activityCompose = "1.7.2"
 coreSplashscreen = "1.0.1"
+pytorch_android_lite = "1.13.0"
 
 [libraries]
 play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+pytorch_android_lite = { module = "org.pytorch:pytorch_android_lite", version.ref = "pytorch_android_lite" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }

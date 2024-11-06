@@ -2,11 +2,12 @@ package com.delta.restart
 
 import android.hardware.Sensor
 import android.hardware.SensorManager
+import org.pytorch.Module
 
-class SensorHandler(fileHandler: FileHandler, sensorManager: SensorManager) {
+class SensorHandler(fileHandler: FileHandler, sensorManager: SensorManager, module: Module) {
     private var mSensorManager: SensorManager = sensorManager
     private var mFileHandler: FileHandler = fileHandler
-    private val mAccelerometerListener: AccelerometerListener = AccelerometerListener(mFileHandler)
+    private val mAccelerometerListener: AccelerometerListener = AccelerometerListener(mFileHandler,module)
     private val mGyroscopeListener: GyroscopeListener = GyroscopeListener(mFileHandler)
     init {
         val samplingRateHertz = 100
