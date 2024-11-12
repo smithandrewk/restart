@@ -1,13 +1,15 @@
 package com.delta.restart
 
 import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 
 class SensorHandler(fileHandler: FileHandler, sensorManager: SensorManager) {
     private var mSensorManager: SensorManager = sensorManager
     private var mFileHandler: FileHandler = fileHandler
-    private val mAccelerometerListener: AccelerometerListener = AccelerometerListener(mFileHandler)
-    private val mGyroscopeListener: GyroscopeListener = GyroscopeListener(mFileHandler)
+    private val mAccelerometerListener: SensorListener = SensorListener { event -> mFileHandler.writeAccelerometerEvent(event) }
+    private val mGyroscopeListener: SensorListener = SensorListener { event -> mFileHandler.writeGyroscopeEvent(event) }
     init {
         val samplingRateHertz = 100
         val mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -26,4 +28,13 @@ class SensorHandler(fileHandler: FileHandler, sensorManager: SensorManager) {
         unregisterAccelerometer()
         unregisterGyroscope()
     }
+}
+
+class SensorListener (private val writeEvent: (SensorEvent) -> Unit): SensorEventListener {
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event != null) {
+            writeEvent(event)
+        }
+    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
