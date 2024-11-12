@@ -13,22 +13,26 @@ import android.os.PowerManager
 import androidx.annotation.RequiresApi
 
 class SensorService: Service() {
+    companion object {
+        var isRunning = false
+    }
     private lateinit var wakeLock: PowerManager.WakeLock
     private lateinit var mSensorHandler: SensorHandler
     private lateinit var mBatteryHandler: BatteryHandler
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        log("SensorService::onStartCommand")
         return START_STICKY
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
-        super.onCreate()
         // Initialize FileHandler
         FileManager.initialize(this)
-
-        log("onCreateService")
+        log("SensorService::onCreate")
+        super.onCreate()
+        isRunning = true
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SensorService::WakeLock");
         wakeLock.acquire()
@@ -40,6 +44,7 @@ class SensorService: Service() {
     }
 
     private fun startForegroundService() {
+        log("SensorService::startForegroundService")
         val channel = NotificationChannel(
             "my_service",
             "My Service Channel",
@@ -52,15 +57,14 @@ class SensorService: Service() {
             .setContentText("This is a running foreground service")
             .setSmallIcon(R.drawable.ic_notification)
             .build()
-
-
         startForeground(1, notification)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onDestroy() {
         super.onDestroy()
-        log("onDestroyService")
+        log("SensorService::onDestroyService")
+        isRunning = false
         if (wakeLock.isHeld) {
             wakeLock.release()
         }

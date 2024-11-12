@@ -25,7 +25,7 @@ class BatteryHandler (registerReceiver: (receiver: BroadcastReceiver, filter: In
     fun unregister(){
         mUnregisterReceiver(br)
     }
-    class BatteryBroadcastReceiver (): BroadcastReceiver() {
+    class BatteryBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val level: Int = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
             val scale: Int = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
