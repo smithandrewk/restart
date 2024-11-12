@@ -5,16 +5,16 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 
-class SensorHandler(fileHandler: FileHandler, sensorManager: SensorManager) {
+class SensorHandler(sensorManager: SensorManager) {
     private var mSensorManager: SensorManager = sensorManager
-    private var mFileHandler: FileHandler = fileHandler
-    private val mAccelerometerListener: SensorListener = SensorListener { event -> mFileHandler.writeAccelerometerEvent(event) }
-    private val mGyroscopeListener: SensorListener = SensorListener { event -> mFileHandler.writeGyroscopeEvent(event) }
+    private val mAccelerometerListener: SensorListener = SensorListener { event -> FileManager.writeAccelerometerEvent(event) }
+    private val mGyroscopeListener: SensorListener = SensorListener { event -> FileManager.writeGyroscopeEvent(event) }
     init {
         val samplingRateHertz = 100
         val mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         val mGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
         val samplingPeriodMicroseconds = 1000000/samplingRateHertz
+        log("registering sensor event listeners")
         mSensorManager.registerListener(mAccelerometerListener, mAccelerometer, samplingPeriodMicroseconds)
         mSensorManager.registerListener(mGyroscopeListener, mGyroscope, samplingPeriodMicroseconds)
     }

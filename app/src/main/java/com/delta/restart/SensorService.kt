@@ -10,15 +10,12 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import android.util.Log
 import androidx.annotation.RequiresApi
 
 class SensorService: Service() {
     private lateinit var wakeLock: PowerManager.WakeLock
     private lateinit var mSensorHandler: SensorHandler
-    private lateinit var mFileHandler: FileHandler
     private lateinit var mBatteryHandler: BatteryHandler
-    private val mMainViewModel = MainViewModel()
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return START_STICKY
@@ -28,14 +25,16 @@ class SensorService: Service() {
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
         super.onCreate()
-        Log.d("0000","onCreateService")
+        // Initialize FileHandler
+        FileManager.initialize(this)
+
+        log("onCreateService")
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SensorService::WakeLock");
         wakeLock.acquire()
-        mFileHandler = FileHandler(filesDir)
-        mSensorHandler = SensorHandler(mFileHandler,getSystemService(SENSOR_SERVICE) as SensorManager)
+        mSensorHandler = SensorHandler(getSystemService(SENSOR_SERVICE) as SensorManager)
         if (Build.VERSION.SDK_INT > 28) {
-            mBatteryHandler = BatteryHandler(::registerReceiver,::unregisterReceiver, mFileHandler, mMainViewModel::updateBatteryLevel)
+            mBatteryHandler = BatteryHandler(::registerReceiver,::unregisterReceiver)
         }
         startForegroundService()
     }
@@ -61,12 +60,12 @@ class SensorService: Service() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("0000","onDestroyService")
+        log("onDestroyService")
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
         mSensorHandler.unregisterAll()
-        mFileHandler.closeFiles()
+        FileManager.closeFileOutputStream()
         if (Build.VERSION.SDK_INT > 28) {
             mBatteryHandler.unregister()
         }
