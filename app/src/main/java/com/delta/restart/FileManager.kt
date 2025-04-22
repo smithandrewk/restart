@@ -3,6 +3,7 @@ package com.delta.restart
 import android.content.Context
 import android.hardware.SensorEvent
 import android.os.Build
+import android.os.SystemClock
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -22,7 +23,7 @@ object FileManager {
         if (!this::filesDir.isInitialized) {
             filesDir = context.filesDir
             setupDirectoriesAndFiles()
-            log("FileManager was not initialized, initializing now")
+            log("FileManager was not initialized initializing now")
         }
     }
 
@@ -50,12 +51,13 @@ object FileManager {
         fLog.write("Device Model: $deviceModel\n".toByteArray())
         fLog.write("Manufacturer: $manufacturer\n".toByteArray())
         fLog.write("SDK Version: $sdkVersion\n\n".toByteArray())
-        fLog.write("Timestamp,Message\n".toByteArray())
+        fLog.write("Timestamp,ns_since_reboot,Message\n".toByteArray())
     }
 
     fun writeToLog(msg: String) {
         if (this::fLog.isInitialized) {
-            fLog.write("${System.currentTimeMillis()},$msg\n".toByteArray())
+            fLog.write("${System.currentTimeMillis()},${SystemClock.elapsedRealtimeNanos()},$msg\n".toByteArray())
+
         } else {
             throw IllegalStateException("FileOutputStream is not initialized. Call initialize() first.")
         }

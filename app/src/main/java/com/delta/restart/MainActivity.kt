@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
         log("MainActivity::onStart")
         super.onStart()
         if (!SensorService.isRunning) {
-            log("MainActivity::sensor service was not running, starting now")
+            log("MainActivity::sensor service was not running starting now")
             val serviceIntent = Intent(this, SensorService::class.java)
             startForegroundService(serviceIntent)
         }
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), REQUEST_BACKGROUND_LOCATION)
             } else {
                 if (!LocationService.isRunning) {
-                    log("MainActivity::location service was not running, starting now")
+                    log("MainActivity::location service was not running starting now")
                     val serviceIntent = Intent(this, LocationService::class.java)
                     startForegroundService(serviceIntent)
                 }
@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
                     // Background location permission granted
                     log("background location permitted")
                     if (!LocationService.isRunning) {
-                        log("MainActivity::location service was not running, starting now")
+                        log("MainActivity::location service was not running starting now")
                         val serviceIntent = Intent(this, LocationService::class.java)
                         startForegroundService(serviceIntent)
                     }
