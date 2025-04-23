@@ -56,7 +56,7 @@ object FileManager {
 
     fun writeToLog(msg: String) {
         if (this::fLog.isInitialized) {
-            fLog.write("${System.currentTimeMillis()},${SystemClock.elapsedRealtimeNanos()},$msg\n".toByteArray())
+            fLog.write("${System.currentTimeMillis()},${SystemClock.elapsedRealtimeNanos()},\"$msg\"\n".toByteArray())
 
         } else {
             throw IllegalStateException("FileOutputStream is not initialized. Call initialize() first.")

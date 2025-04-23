@@ -3,13 +3,14 @@ package com.delta.restart
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import androidx.activity.ComponentActivity
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            val serviceIntent = Intent(context, SensorService::class.java)
-            context.startForegroundService(serviceIntent)
+            log("BootReceiver::onReceive - Boot completed")
+                ServiceUtils.startSensorServiceIfNotRunning(context)
+                LocationUtils.checkAndRequestPermissions(context, context as ComponentActivity)
         }
     }
 }
