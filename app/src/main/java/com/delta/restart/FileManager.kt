@@ -12,6 +12,7 @@ import java.util.Locale
 import java.util.zip.GZIPOutputStream
 
 object FileManager {
+    private var isInitialized = false
     private lateinit var fLog: FileOutputStream
     private lateinit var fAccelerometerData: GZIPOutputStream
     private lateinit var fGyroscopeData: GZIPOutputStream
@@ -20,10 +21,13 @@ object FileManager {
 
     // Initialize method to set up file streams and metadata
     fun initialize(context: Context) {
-        if (!this::filesDir.isInitialized) {
+        if (!isInitialized) {
             filesDir = context.filesDir
             setupDirectoriesAndFiles()
+            isInitialized = true
             log("FileManager was not initialized initializing now")
+        } else {
+            log("FileManager was already initialized")
         }
     }
 

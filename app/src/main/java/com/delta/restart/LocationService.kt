@@ -46,9 +46,9 @@ class LocationService: Service() {
 
     override fun onCreate() {
         super.onCreate()
+        FileManager.initialize(this)
         log("LocationService::onCreate")
         isRunning = true
-        FileManager.initialize(this)
         startForegroundService()
     }
     private fun startForegroundService() {

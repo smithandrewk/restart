@@ -28,10 +28,9 @@ class SensorService: Service() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("WakelockTimeout")
     override fun onCreate() {
-        // Initialize FileHandler
+        super.onCreate()
         FileManager.initialize(this)
         log("SensorService::onCreate")
-        super.onCreate()
         isRunning = true
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SensorService::WakeLock");

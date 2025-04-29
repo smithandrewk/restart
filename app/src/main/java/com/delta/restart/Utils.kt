@@ -19,21 +19,28 @@ object LocationUtils {
     const val REQUEST_BACKGROUND_LOCATION = 2
 
     fun checkAndRequestPermissions(context: Context, activity: ComponentActivity) {
+        log("LocationUtils::checkAndRequestPermissions")
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            log("LocationUtils::access fine location not granted. requesting fine location permission")
             ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_FINE_LOCATION)
         } else {
+            log("LocationUtils::access fine location already granted. checking background location permission")
             requestBackgroundLocationPermission(context, activity)
         }
     }
 
     private fun requestBackgroundLocationPermission(context: Context, activity: ComponentActivity) {
+        log("LocationUtils::requestBackgroundLocationPermission")
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                log("LocationUtils::access background location not granted. requesting background location permission")
                 ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), REQUEST_BACKGROUND_LOCATION)
             } else {
+                log("LocationUtils::access background location already granted. startLocationServiceIfNotRunning")
                 startLocationServiceIfNotRunning(context)
             }
         } else {
+            log("LocationUtils::sdk too low for background location")
             startLocationServiceIfNotRunning(context)
         }
     }
@@ -41,7 +48,6 @@ object LocationUtils {
         if (!LocationService.isRunning) {
             val serviceIntent = Intent(context, LocationService::class.java)
             ContextCompat.startForegroundService(context, serviceIntent)
-            log("LocationUtils::LocationService started")
         } else {
             log("LocationUtils::LocationService is already running")
         }
@@ -56,19 +62,19 @@ object LocationUtils {
         when (requestCode) {
             REQUEST_FINE_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    log("PermissionUtils::Fine location permission granted")
+                    log("LocationUtils::Fine location permission granted")
                     checkAndRequestPermissions(context, context as ComponentActivity)
                 } else {
-                    log("PermissionUtils::Fine location permission denied")
+                    log("LocationUtils::Fine location permission denied")
                     onPermissionDenied()
                 }
             }
             REQUEST_BACKGROUND_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    log("PermissionUtils::Background location permission granted")
+                    log("LocationUtils::Background location permission granted")
                     startLocationServiceIfNotRunning(context)
                 } else {
-                    log("PermissionUtils::Background location permission denied")
+                    log("LocationUtils::Background location permission denied")
                     onPermissionDenied()
                 }
             }
@@ -81,7 +87,6 @@ object ServiceUtils {
         if (!SensorService.isRunning) {
             val serviceIntent = Intent(context, SensorService::class.java)
             ContextCompat.startForegroundService(context, serviceIntent)
-            log("ServiceUtils::SensorService started")
         } else {
             log("ServiceUtils::SensorService is already running")
         }

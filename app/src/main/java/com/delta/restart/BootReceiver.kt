@@ -8,9 +8,9 @@ import androidx.activity.ComponentActivity
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            log("BootReceiver::onReceive - Boot completed")
                 ServiceUtils.startSensorServiceIfNotRunning(context)
-                LocationUtils.checkAndRequestPermissions(context, context as ComponentActivity)
+                // Permissions should really be established during installation, so this is kosher.
+                LocationUtils.startLocationServiceIfNotRunning(context)
         }
     }
 }
